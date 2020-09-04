@@ -1,0 +1,47 @@
+﻿<UserControl x:Class="Percue.View.ScrollableSetlist"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:model="clr-namespace:Percue.Model"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+             xmlns:local="clr-namespace:Percue.View"
+             mc:Ignorable="d" 
+             VerticalAlignment="Stretch"             
+             d:DesignHeight="450" d:DesignWidth="800">
+    <ItemsControl ItemsSource="{Binding}" VerticalAlignment="Stretch" HorizontalAlignment="Left" >
+        <ItemsControl.ItemContainerStyle>
+            <Style TargetType="ContentPresenter">
+                <Setter Property="VerticalAlignment" Value="Stretch"/>
+            </Style>
+        </ItemsControl.ItemContainerStyle>
+        <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+                <StackPanel Orientation="Horizontal"/>
+            </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+            <DataTemplate DataType="{x:Type model:Channel}">
+                <GroupBox VerticalAlignment="Stretch" Foreground="White" MinWidth="50px">
+                    <GroupBox.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding Name}" VerticalAlignment="Center"/>
+                            <Button Click="Button_Click" Content="{iconPacks:Zondicons Kind=EditPencil, Height=8}" Margin="10 0 0 0" Background="Transparent" BorderBrush="#00707070" BorderThickness="0"/>
+                        </StackPanel>
+                    </GroupBox.Header>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Slider Minimum="0" Maximum="1" TickFrequency="0.05" Value="{Binding ChannelVolume}" TickPlacement="Both" HorizontalAlignment="Center" IsMoveToPointEnabled="True" Orientation="Vertical" MinHeight="200px"></Slider>
+                        <ToggleButton  Grid.Row="1" IsChecked="{Binding IsPlaying, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Content="{iconPacks:MaterialDesign Kind=PlayArrow}"  Margin="5" Background="Transparent">
+                            
+                        </ToggleButton>
+                    </Grid>
+                </GroupBox>
+                
+            </DataTemplate>
+        </ItemsControl.ItemTemplate>
+    </ItemsControl>
+</UserControl>
