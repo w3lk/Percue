@@ -33,11 +33,16 @@
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*"/>
                             <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
                         <Slider Minimum="0" Maximum="1" TickFrequency="0.05" Value="{Binding ChannelVolume}" TickPlacement="Both" HorizontalAlignment="Center" IsMoveToPointEnabled="True" Orientation="Vertical" MinHeight="200px"></Slider>
                         <ToggleButton  Grid.Row="1" IsChecked="{Binding IsPlaying, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Content="{iconPacks:MaterialDesign Kind=PlayArrow}"  Margin="5" Background="Transparent">
                             
                         </ToggleButton>
+                        <StackPanel Grid.Row="2" Orientation="Horizontal">
+                            <TextBlock Text="{Binding ChannelHotKey}"/>
+                            <Button Click="EditHotKey_Click" Content="{iconPacks:Zondicons Kind=EditPencil, Height=8}" Margin="10 0 0 0" Background="Transparent" BorderBrush="#00707070" BorderThickness="0"/>
+                        </StackPanel>
                     </Grid>
                 </GroupBox>
                 

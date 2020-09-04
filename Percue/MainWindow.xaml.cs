@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -30,9 +31,16 @@ namespace Percue
     {
 
         private Setlist currentShow = new Setlist();
-        public Setlist CurrentShow { get => currentShow; set => currentShow = value; }
+        public Setlist CurrentShow
+        {
+            get => currentShow; set
+            {
+                currentShow = value;
+                OnPropertyChanged(nameof(CurrentShow));
+            }
+        }
 
-        
+
         public MainWindow()
         {
             InitializeComponent();
@@ -148,10 +156,69 @@ namespace Percue
                 
             }
         }
+
+        private RelayCommand newShow;
+        public ICommand NewShow
+        {
+            get
+            {
+                if(newShow == null)
+                {
+                    newShow = new RelayCommand(NewShowExecute);
+                }
+                return newShow;
+            }
+        }
+
+        public async void NewShowExecute()
+        {
+            if (CurrentShow.Count == 0) return;
+            var mySettings = new MetroDialogSettings()
+            {
+                AffirmativeButtonText = "Ok",
+                NegativeButtonText = "Cancel",
+                
+            };
+
+            MessageDialogResult result = await this.ShowMessageAsync("New Show", "All Unsaved Changes will be lost",
+                MessageDialogStyle.AffirmativeAndNegative, mySettings);
+
+            if (result == MessageDialogResult.Affirmative)
+            {
+                CurrentShow = new Setlist();
+                
+
+            }
+        }
+
         public void OnPropertyChanged(string name)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
+        private string LastShowPath = AppDomain.CurrentDomain.BaseDirectory + "//LastShow.pc";
+        private void MetroWindow_Closing(object sender, CancelEventArgs e)
+        {
+            if (CurrentShow.Count == 0) return;
+            var fs = new StreamWriter(LastShowPath);
+            var ser = new XmlSerializer(typeof(Setlist));
+            ser.Serialize(fs, CurrentShow);
+            fs.Close();
+        }
+
+        private void MetroWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (!File.Exists(LastShowPath)) return;
+            var fs = File.Open(LastShowPath,FileMode.Open);
+            var ser = new XmlSerializer(typeof(Setlist));
+            CurrentShow = (Setlist)ser.Deserialize(fs);
+            OnPropertyChanged(nameof(CurrentShow));
+            foreach(var channel in CurrentShow)
+            {
+                channel.RegisterHotKey(channel.ChannelHotKey);
+            }
+            fs.Close();
+
+        }
     }
 }

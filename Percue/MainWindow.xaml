@@ -9,6 +9,8 @@
         mc:Ignorable="d"
         Title="Percue" Height="450" Width="800"        
         DataContext="{Binding RelativeSource={RelativeSource Self}}"
+        Closing ="MetroWindow_Closing"
+        Loaded="MetroWindow_Loaded"
        >
     <Grid>
         <Grid.RowDefinitions>
@@ -16,7 +18,7 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <Menu>
-            <MenuItem Header="New" />
+            <MenuItem Header="New" Command="{Binding NewShow}"/>
             <MenuItem Header="_Save" Command="{Binding SaveShow}" />
             <MenuItem Header="_Open" Command="{Binding OpenShow}" />
             <MenuItem Header="Add Channel" Command="{Binding AddChannel}"/>

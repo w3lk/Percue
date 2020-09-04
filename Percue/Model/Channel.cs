@@ -133,7 +133,9 @@ namespace Percue.Model
                     UnsetHotkey();
                 else
                     RegisterHotKey(channelHotKey);
+                OnPropertyChanged(nameof(ChannelHotKey));
                 }
+
         }
 
         [DllImport("User32.dll")]
@@ -155,9 +157,7 @@ namespace Percue.Model
         public void SetHotkey(string keyString)
         {
             
-            var helper = new WindowInteropHelper(System.Windows.Application.Current.MainWindow);
-            _source = HwndSource.FromHwnd(helper.Handle);
-            _source.AddHook(HwndHook);
+            
             Keys k;
             Enum.TryParse<Keys>(keyString, out k);
             ChannelHotKey = k;
@@ -165,16 +165,19 @@ namespace Percue.Model
 
         public void UnsetHotkey()
         {
-            _source.RemoveHook(HwndHook);
+            if(_source != null)
+                _source.RemoveHook(HwndHook);
             _source = null;
             UnregisterHotKey();
             
         }
 
-        private void RegisterHotKey(Keys key)
+        public void RegisterHotKey(Keys key)
         {
             var helper = new WindowInteropHelper(System.Windows.Application.Current.MainWindow);
-            
+            _source = HwndSource.FromHwnd(helper.Handle);
+            _source.AddHook(HwndHook);
+
             const uint MOD_CTRL = 0x0000;
             
             if (!RegisterHotKey(helper.Handle, HOTKEY_ID, MOD_CTRL, (uint)key))

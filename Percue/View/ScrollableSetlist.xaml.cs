@@ -41,5 +41,24 @@ namespace Percue.View
             ch.Name = newName;
 
         }
+
+        private async void EditHotKey_Click(object sender, RoutedEventArgs e)
+        {
+            if (!(sender is Button btn)) return;
+            if (!(btn.DataContext is Channel ch)) return;
+            var metroWindow = (Application.Current.MainWindow as MetroWindow);
+
+            var newHotKey = await metroWindow.ShowInputAsync("New HotKey", "New Hotkey for channel", settings: new MetroDialogSettings { DefaultText = ch.ChannelHotKey.ToString() });
+            if (newHotKey == "")
+            {
+                ch.UnsetHotkey();
+            }
+            else
+            {
+                ch.UnsetHotkey();
+                ch.SetHotkey(newHotKey);
+            }
+            
+        }
     }
 }
