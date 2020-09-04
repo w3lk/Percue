@@ -36,7 +36,7 @@
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
                         <Slider Minimum="0" Maximum="1" TickFrequency="0.05" Value="{Binding ChannelVolume}" TickPlacement="Both" HorizontalAlignment="Center" IsMoveToPointEnabled="True" Orientation="Vertical" MinHeight="200px"></Slider>
-                        <ToggleButton  Grid.Row="1" IsChecked="{Binding IsPlaying, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Content="{iconPacks:MaterialDesign Kind=PlayArrow}"  Margin="5" Background="Transparent">
+                        <ToggleButton  Grid.Row="1" IsChecked="{Binding IsPlaying, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Content="{iconPacks:MaterialDesign Kind=PlayArrow}"  Margin="5" >
                             
                         </ToggleButton>
                         <StackPanel Grid.Row="2" Orientation="Horizontal">

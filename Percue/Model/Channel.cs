@@ -15,6 +15,7 @@ using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Interop;
+using System.Xml.Serialization;
 
 namespace Percue.Model
 {
@@ -49,6 +50,7 @@ namespace Percue.Model
         }
 
         private bool isPlaying;
+        [XmlIgnoreAttribute]
         public bool IsPlaying
         {
             get { return isPlaying; }
@@ -94,6 +96,7 @@ namespace Percue.Model
 
         public new void Play()
         {
+            if (Audio == null) return;
             if (Audio.Length <= 0) return;
             IWaveProvider provider = new RawSourceWaveStream(
                          new MemoryStream(Audio), new WaveFormat());

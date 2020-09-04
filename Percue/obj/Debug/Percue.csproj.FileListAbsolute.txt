@@ -108,3 +108,7 @@ C:\Users\mariu\source\repos\Percue\Percue\bin\Debug\MahApps.Metro.IconPacks.Zond
 C:\Users\mariu\source\repos\Percue\Percue\bin\Debug\Ookii.Dialogs.Wpf.dll
 C:\Users\mariu\source\repos\Percue\Percue\bin\Debug\Ookii.Dialogs.Wpf.pdb
 C:\Users\mariu\source\repos\Percue\Percue\bin\Debug\Ookii.Dialogs.Wpf.xml
+C:\Users\mariu\Source\Repos\Percue\Percue\bin\Debug\Percue.exe.manifest
+C:\Users\mariu\Source\Repos\Percue\Percue\bin\Debug\Percue.application
+C:\Users\mariu\Source\Repos\Percue\Percue\obj\Debug\Percue.exe.manifest
+C:\Users\mariu\Source\Repos\Percue\Percue\obj\Debug\Percue.application

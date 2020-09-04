@@ -65,25 +65,28 @@ namespace Percue
         
         public async void AddChannelExecute()
         {
-            var ch = new Channel { Name = "Channel " + CurrentShow.Count };
             
-            string filePath;
             using (OpenFileDialog openFileDialog = new OpenFileDialog())
             {
                 openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyMusic);
                 openFileDialog.Filter = "All Media Files|*.wav;*.aac;*.wma;*.wmv;*.avi;*.mpg;*.mpeg;*.m1v;*.mp2;*.mp3;*.mpa;*.mpe;*.m3u;*.mp4;*.mov;*.3g2;*.3gp2;*.3gp;*.3gpp;*.m4a;*.cda;*.aif;*.aifc;*.aiff;*.mid;*.midi;*.rmi;*.mkv;*.WAV;*.AAC;*.WMA;*.WMV;*.AVI;*.MPG;*.MPEG;*.M1V;*.MP2;*.MP3;*.MPA;*.MPE;*.M3U;*.MP4;*.MOV;*.3G2;*.3GP2;*.3GP;*.3GPP;*.M4A;*.CDA;*.AIF;*.AIFC;*.AIFF;*.MID;*.MIDI;*.RMI;*.MKV";
                 openFileDialog.FilterIndex = 2;
                 openFileDialog.RestoreDirectory = true;
+                openFileDialog.Multiselect = true;
 
                 if (openFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                 {
                     //Get the path of specified file
-                    filePath = openFileDialog.FileName;
-                    ch.LoadAudioFromFile(filePath);
-                    var hotKey = await this.ShowInputAsync("HotKey", "Specify Hot Key");
-                    ch.SetHotkey(hotKey);
-                    
-                    CurrentShow.Add(ch);
+                    foreach (var filePath in openFileDialog.FileNames)
+                    {
+                        var fileName = System.IO.Path.GetFileNameWithoutExtension(filePath);
+                        var ch = new Channel { Name = fileName };
+                        ch.LoadAudioFromFile(filePath);
+                        var hotKey = await this.ShowInputAsync("HotKey", "Specify Hot Key for "+ fileName);
+                        ch.SetHotkey(hotKey);
+
+                        CurrentShow.Add(ch);
+                    }
                 }
             }
 
@@ -185,6 +188,11 @@ namespace Percue
 
             if (result == MessageDialogResult.Affirmative)
             {
+
+                foreach(var channel in CurrentShow)
+                {
+                    channel.UnsetHotkey();
+                }
                 CurrentShow = new Setlist();
                 
 
@@ -218,7 +226,7 @@ namespace Percue
                 channel.RegisterHotKey(channel.ChannelHotKey);
             }
             fs.Close();
-
+            
         }
     }
 }
