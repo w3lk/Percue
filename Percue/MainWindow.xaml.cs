@@ -1,7 +1,8 @@
-﻿using GalaSoft.MvvmLight.Command;
+﻿
 using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
 using Percue.Model;
+using Percue.Resources;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -63,7 +64,8 @@ namespace Percue
         }
 
         
-        public async void AddChannelExecute()
+
+        public async void AddChannelExecute(object obj)
         {
             
             using (OpenFileDialog openFileDialog = new OpenFileDialog())
@@ -104,7 +106,7 @@ namespace Percue
                 return saveShow;
             }
         }
-        public void SaveShowExecute() {
+        public void SaveShowExecute(object obj) {
             // Displays a SaveFileDialog so the user can save the Show
             SaveFileDialog saveFileDialog1 = new SaveFileDialog();
             saveFileDialog1.Filter = "Percue|*.pc";
@@ -138,7 +140,7 @@ namespace Percue
                 return openShow;
             }
         }
-        public void OpenShowExecute()
+        public void OpenShowExecute(object obj)
         {
             // Displays a OpenFileDialog so the user can open the Show
             
@@ -173,7 +175,7 @@ namespace Percue
             }
         }
 
-        public async void NewShowExecute()
+        public async void NewShowExecute(object obj)
         {
             if (CurrentShow.Count == 0) return;
             var mySettings = new MetroDialogSettings()
@@ -229,4 +231,6 @@ namespace Percue
             
         }
     }
+
+    
 }

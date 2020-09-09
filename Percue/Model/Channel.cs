@@ -1,5 +1,4 @@
-﻿using GalaSoft.MvvmLight.Command;
-using NAudio.Wave;
+﻿using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 using System;
 using System.Collections.Generic;
@@ -112,7 +111,7 @@ namespace Percue.Model
             var outfile = @"C:\Temp\converted.wav";
             using (var reader = new MediaFoundationReader(path))
             {
-                WaveFileWriter.CreateWaveFile(outfile, reader);               
+                WaveFileWriter.CreateWaveFile(outfile, reader);
             }
                         
             Audio = File.ReadAllBytes(outfile);
