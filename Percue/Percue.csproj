@@ -10,6 +10,13 @@
     <ManifestCertificateThumbprint>86377F88F3C705C107197BA0E91331A95138B2F3</ManifestCertificateThumbprint>
     <StartupObject>Percue.App</StartupObject>
     <Authors>Marius Welk</Authors>
+    <SignAssembly>false</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="MahApps.Metro" Version="2.2.0" />
