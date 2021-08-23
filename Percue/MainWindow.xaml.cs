@@ -207,13 +207,42 @@ namespace Percue
         }
 
         private string LastShowPath = AppDomain.CurrentDomain.BaseDirectory + "//LastShow.pc";
-        private void MetroWindow_Closing(object sender, CancelEventArgs e)
+        private bool closeMe;
+        private async void MetroWindow_Closing(object sender, CancelEventArgs e)
         {
-            if (CurrentShow.Count == 0) return;
-            var fs = new StreamWriter(LastShowPath);
-            var ser = new XmlSerializer(typeof(Setlist));
-            ser.Serialize(fs, CurrentShow);
-            fs.Close();
+            if (e.Cancel) return;
+
+            e.Cancel = !this.closeMe;
+
+            if (this.closeMe) return;
+
+            var dialogSettings = new MetroDialogSettings()
+            {
+                AffirmativeButtonText = "Yes",
+                NegativeButtonText = "No",
+                AnimateShow = true,
+                AnimateHide = false
+            };
+
+            var result = await this.ShowMessageAsync(
+                "Quit application?",
+                "Sure you want to quit application?",
+                MessageDialogStyle.AffirmativeAndNegative, dialogSettings);
+
+            if (result == MessageDialogResult.Affirmative)
+            {
+                if (CurrentShow.Count > 0)
+                {
+                    var fs = new StreamWriter(LastShowPath);
+                    var ser = new XmlSerializer(typeof(Setlist));
+                    ser.Serialize(fs, CurrentShow);
+                    fs.Close();
+                }
+            }
+
+            this.closeMe = result == MessageDialogResult.Affirmative;
+
+            if (this.closeMe) this.Close();
         }
 
         private void MetroWindow_Loaded(object sender, RoutedEventArgs e)
@@ -222,11 +251,7 @@ namespace Percue
             var fs = File.Open(LastShowPath,FileMode.Open);
             var ser = new XmlSerializer(typeof(Setlist));
             CurrentShow = (Setlist)ser.Deserialize(fs);
-            OnPropertyChanged(nameof(CurrentShow));
-            foreach(var channel in CurrentShow)
-            {
-                channel.RegisterHotKey(channel.ChannelHotKey);
-            }
+            OnPropertyChanged(nameof(CurrentShow));          
             fs.Close();
             
         }

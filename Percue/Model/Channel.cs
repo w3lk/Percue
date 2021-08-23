@@ -153,6 +153,8 @@ namespace Percue.Model
             [In] int id);
 
         private HwndSource _source;
+
+        [XmlIgnore]
         public int HOTKEY_ID { get; set; } = 9000;
         
 

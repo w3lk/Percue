@@ -9,44 +9,59 @@
              mc:Ignorable="d" 
              VerticalAlignment="Stretch"             
              d:DesignHeight="450" d:DesignWidth="800">
-    <ItemsControl ItemsSource="{Binding}" VerticalAlignment="Stretch" HorizontalAlignment="Left" >
-        <ItemsControl.ItemContainerStyle>
-            <Style TargetType="ContentPresenter">
-                <Setter Property="VerticalAlignment" Value="Stretch"/>
-            </Style>
-        </ItemsControl.ItemContainerStyle>
-        <ItemsControl.ItemsPanel>
-            <ItemsPanelTemplate>
-                <StackPanel Orientation="Horizontal"/>
-            </ItemsPanelTemplate>
-        </ItemsControl.ItemsPanel>
-        <ItemsControl.ItemTemplate>
-            <DataTemplate DataType="{x:Type model:Channel}">
-                <GroupBox VerticalAlignment="Stretch" Foreground="White" MinWidth="50px">
-                    <GroupBox.Header>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="{Binding Name}" VerticalAlignment="Center"/>
-                            <Button Click="Button_Click" Content="{iconPacks:Zondicons Kind=EditPencil, Height=8}" Margin="10 0 0 0" Background="Transparent" BorderBrush="#00707070" BorderThickness="0"/>
-                        </StackPanel>
-                    </GroupBox.Header>
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="*"/>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
-                        <Slider Minimum="0" Maximum="1" TickFrequency="0.05" Value="{Binding ChannelVolume}" TickPlacement="Both" HorizontalAlignment="Center" IsMoveToPointEnabled="True" Orientation="Vertical" MinHeight="200px"></Slider>
-                        <ToggleButton  Grid.Row="1" IsChecked="{Binding IsPlaying, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Content="{iconPacks:MaterialDesign Kind=PlayArrow}"  Margin="5" >
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">
+        <ItemsControl ItemsSource="{Binding}" VerticalAlignment="Stretch" HorizontalAlignment="Left" >
+            <ItemsControl.ItemContainerStyle>
+                <Style TargetType="ContentPresenter">
+                    <Setter Property="VerticalAlignment" Value="Stretch"/>
+                </Style>
+            </ItemsControl.ItemContainerStyle>
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel Orientation="Horizontal"/>
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="{x:Type model:Channel}">
+                    <GroupBox VerticalAlignment="Stretch" Foreground="White" Width="120px">
+                        <GroupBox.Header>
+                            <StackPanel Orientation="Horizontal">
+                                <StackPanel.ContextMenu>
+                                    <ContextMenu>
+                                        <MenuItem Header="{Binding Name}" Icon="{iconPacks:FontAwesome Kind=SignatureSolid}" Click="ChangeName_Click"></MenuItem>
+                                        <MenuItem Header="{Binding ChannelHotKey}" Icon="{iconPacks:MaterialDesign Kind=Keyboard}" Click="EditHotKey_Click"></MenuItem>
+                                        <Separator/>
+                                        <MenuItem Header="Delete" Icon="{iconPacks:MaterialDesign Kind=Delete}"></MenuItem>
+                                    </ContextMenu>
+                                </StackPanel.ContextMenu>
+                                <TextBlock Text="{Binding Name}" ToolTip="{Binding Name}"  VerticalAlignment="Center" Width="70px"/>
+                                <Button Click="ChangeName_Click" Content="{iconPacks:Zondicons Kind=EditPencil, Height=8}" Margin="10 0 0 0" Background="Transparent" BorderBrush="#00707070" BorderThickness="0"/>
+                            </StackPanel>
+                        </GroupBox.Header>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Slider Minimum="0" Maximum="1" TickFrequency="0.05" Value="{Binding ChannelVolume}" TickPlacement="Both" HorizontalAlignment="Center" IsMoveToPointEnabled="True" Orientation="Vertical" MinHeight="200px"></Slider>
+                            <ToggleButton  Grid.Row="1" IsChecked="{Binding IsPlaying, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Content="{iconPacks:MaterialDesign Kind=PlayArrow}"  Margin="15" >
                             
-                        </ToggleButton>
-                        <StackPanel Grid.Row="2" Orientation="Horizontal">
-                            <TextBlock Text="{Binding ChannelHotKey}"/>
-                            <Button Click="EditHotKey_Click" Content="{iconPacks:Zondicons Kind=EditPencil, Height=8}" Margin="10 0 0 0" Background="Transparent" BorderBrush="#00707070" BorderThickness="0"/>
-                        </StackPanel>
-                    </Grid>
-                </GroupBox>
+                            </ToggleButton>
+                            <Grid Grid.Row="2" >
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="{Binding ChannelHotKey}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            
+                                <Button Grid.Column="1" Click="EditHotKey_Click" Content="{iconPacks:Zondicons Kind=EditPencil, Height=8}" Margin="10 0 0 0" Background="Transparent" BorderBrush="#00707070" BorderThickness="0"/>
+                            </Grid>
+                        </Grid>
+                    </GroupBox>
                 
-            </DataTemplate>
-        </ItemsControl.ItemTemplate>
-    </ItemsControl>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </ScrollViewer>
 </UserControl>

@@ -30,10 +30,13 @@ namespace Percue.View
 
         
 
-        private async void Button_Click(object sender, RoutedEventArgs e)
+        private async void ChangeName_Click(object sender, RoutedEventArgs e)
         {
-            if (!(sender is Button btn)) return;
-            if (!(btn.DataContext is Channel ch)) return;
+            
+            if (!(sender is FrameworkElement fe)) return;
+            if (!(fe.DataContext is Channel ch)) return;
+                
+            
             var metroWindow = (Application.Current.MainWindow as MetroWindow);
 
             var newName = await metroWindow.ShowInputAsync("Channel Name", "New Name for Channel", settings: new MetroDialogSettings { DefaultText = ch.Name });
@@ -44,13 +47,15 @@ namespace Percue.View
 
         private async void EditHotKey_Click(object sender, RoutedEventArgs e)
         {
-            if (!(sender is Button btn)) return;
-            if (!(btn.DataContext is Channel ch)) return;
+            if (!(sender is FrameworkElement fe)) return;
+            if (!(fe.DataContext is Channel ch)) return;
+
             var metroWindow = (Application.Current.MainWindow as MetroWindow);
 
             var newHotKey = await metroWindow.ShowInputAsync("New HotKey", "New Hotkey for channel", settings: new MetroDialogSettings { DefaultText = ch.ChannelHotKey.ToString() });
             if (newHotKey == "")
             {
+                
                 ch.UnsetHotkey();
             }
             else
@@ -59,6 +64,13 @@ namespace Percue.View
                 ch.SetHotkey(newHotKey);
             }
             
+        }
+
+        private void ScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            ScrollViewer scv = (ScrollViewer)sender;
+            scv.ScrollToHorizontalOffset(scv.HorizontalOffset - e.Delta/10);
+            e.Handled = true;
         }
     }
 }
