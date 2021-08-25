@@ -31,6 +31,8 @@
                                         <MenuItem Header="{Binding Name}" Icon="{iconPacks:FontAwesome Kind=SignatureSolid}" Click="ChangeName_Click"></MenuItem>
                                         <MenuItem Header="{Binding ChannelHotKey}" Icon="{iconPacks:MaterialDesign Kind=Keyboard}" Click="EditHotKey_Click"></MenuItem>
                                         <Separator/>
+                                        <MenuItem Header="Settings" Icon="{iconPacks:MaterialDesign Kind=Settings}" Click="OpenSettingsWindow_Click"></MenuItem>
+                                        <Separator/>
                                         <MenuItem Header="Delete" Icon="{iconPacks:MaterialDesign Kind=Delete}"></MenuItem>
                                     </ContextMenu>
                                 </StackPanel.ContextMenu>

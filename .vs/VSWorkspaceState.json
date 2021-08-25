@@ -1,10 +1,7 @@
 {
   "ExpandedNodes": [
-    "",
-    "\\.github",
-    "\\.github\\workflows",
-    "\\Percue"
+    ""
   ],
-  "SelectedNode": "\\.github\\workflows\\dotnet-core-desktop_Percue.yml",
+  "SelectedNode": "\\Percue.sln",
   "PreviewInSolutionExplorer": false
 }

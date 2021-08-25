@@ -72,5 +72,16 @@ namespace Percue.View
             scv.ScrollToHorizontalOffset(scv.HorizontalOffset - e.Delta/10);
             e.Handled = true;
         }
+
+        private void OpenSettingsWindow_Click(object sender, RoutedEventArgs e)
+        {
+            if(!(sender is FrameworkElement fe)) return;
+            if (!(fe.DataContext is Channel ch)) return;
+
+            var settingsWindow = new ChannelControlWindow();
+            settingsWindow.DataContext = ch;
+
+            settingsWindow.Show();
+        }
     }
 }

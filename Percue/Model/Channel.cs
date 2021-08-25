@@ -1,5 +1,7 @@
 ﻿using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
+using NAudio.WaveFormRenderer;
+using Percue.Extensions;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -14,21 +16,22 @@ using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Interop;
+using System.Windows.Media.Imaging;
 using System.Xml.Serialization;
 
 namespace Percue.Model
 {
     public class Channel : WaveOut, INotifyPropertyChanged
     {
-       
+
 
         public Channel()
         {
             PlaybackStopped += Channel_PlaybackStopped;
-            
+
             HOTKEY_ID = 9000 + ChannelId;
             ChannelId += 1;
-            
+
         }
 
         private static int ChannelId = 0;
@@ -53,10 +56,12 @@ namespace Percue.Model
         public bool IsPlaying
         {
             get { return isPlaying; }
-            set { isPlaying = value;
+            set
+            {
+                isPlaying = value;
                 if (isPlaying)
                 {
-                    
+
                     Play();
                 }
                 else
@@ -67,15 +72,69 @@ namespace Percue.Model
             }
         }
 
-        
+        private int waveImgLength;
+        private bool waveImgLoaded;
+        private BitmapImage waveImg;
+        [XmlIgnore]
+        public BitmapImage WaveImg
+        {
+            get
+            {
+                if (!waveImgLoaded)
+                {
+                    if (WaveImgData != null)
+                    {
+                        var waveImgSource = WaveImgData.Deserialize();
+                        var encoder = new PngBitmapEncoder();
+                        var memoryStream = new MemoryStream();
+                        waveImg = new BitmapImage();
+
+                        encoder.Frames.Add(BitmapFrame.Create(waveImgSource));
+                        encoder.Save(memoryStream);
+
+                        memoryStream.Position = 0;
+                        waveImg.BeginInit();
+                        waveImg.StreamSource = new MemoryStream(memoryStream.ToArray());
+                        waveImg.EndInit();
+
+                        memoryStream.Close();
+                        waveImg.Freeze();
+                        waveImgLoaded = true;
+                    }
+                }
+                return waveImg;
+            }
+            set
+            {
+                waveImg = value;
+                waveImgLoaded = true;
+                WaveImgData = new SerializedBitmapImage();
+                WaveImgData.Serialize(waveImg);
+                OnPropertyChanged(nameof(WaveImg));
+            }
+        }
+
+
+        private SerializedBitmapImage waveImgData;
+        public SerializedBitmapImage WaveImgData
+        {
+            get { return waveImgData; }
+            set { waveImgData = value;
+                OnPropertyChanged(nameof(WaveImgData));
+            }
+
+        }
+
 
         private VolumeSampleProvider volumeSampleProvider;
         private float channelVolume = 1.0f;
-        public float ChannelVolume{
-            get{ return channelVolume; }
+        public float ChannelVolume
+        {
+            get { return channelVolume; }
 
-            set {
-                if(volumeSampleProvider != null)
+            set
+            {
+                if (volumeSampleProvider != null)
                 {
                     volumeSampleProvider.Volume = value;
                 }
@@ -86,11 +145,14 @@ namespace Percue.Model
         }
 
         private byte[] audio;
-        public byte[] Audio 
-        { 
+        public byte[] Audio
+        {
             get { return audio; }
-            set { audio = value;                  
-                  this. OnPropertyChanged(nameof(Audio)); }
+            set
+            {
+                audio = value;
+                this.OnPropertyChanged(nameof(Audio));
+            }
         }
 
         public new void Play()
@@ -101,25 +163,47 @@ namespace Percue.Model
                          new MemoryStream(Audio), new WaveFormat());
             volumeSampleProvider = new VolumeSampleProvider(provider.ToSampleProvider());
             volumeSampleProvider.Volume = ChannelVolume;
-            base.Init(volumeSampleProvider.ToWaveProvider());            
+            base.Init(volumeSampleProvider.ToWaveProvider());
             base.Play();
         }
-        
-         
+
+
         public void LoadAudioFromFile(string path)
         {
             var outfile = @"C:\Temp\converted.wav";
+
             using (var reader = new MediaFoundationReader(path))
             {
                 WaveFileWriter.CreateWaveFile(outfile, reader);
             }
-                        
+
             Audio = File.ReadAllBytes(outfile);
-            
+
+
+
+
+            var renderer = new WaveFormRenderer();
+
+
+            var settings = new StandardWaveFormRendererSettings();
+            settings.Width = 640;
+            settings.TopHeight = 32;
+            settings.BottomHeight = 32;
+            settings.BackgroundColor = System.Drawing.Color.Transparent;
+            try
+            {
+                Bitmap img = (Bitmap)renderer.Render(path, settings);
+                img.Save(@"C:\Temp\imgRenderer.bmp");
+                WaveImg = BitmapExtensions.ToBitmapImage(img);
+            }
+            catch (Exception ex)
+            {
+
+            }
         }
 
 
-        
+
         public event PropertyChangedEventHandler PropertyChanged;
         public void OnPropertyChanged(string name)
         {
@@ -130,13 +214,15 @@ namespace Percue.Model
         public Keys ChannelHotKey
         {
             get { return channelHotKey; }
-            set { channelHotKey = value;
+            set
+            {
+                channelHotKey = value;
                 if (channelHotKey == Keys.None)
                     UnsetHotkey();
                 else
                     RegisterHotKey(channelHotKey);
                 OnPropertyChanged(nameof(ChannelHotKey));
-                }
+            }
 
         }
 
@@ -156,12 +242,12 @@ namespace Percue.Model
 
         [XmlIgnore]
         public int HOTKEY_ID { get; set; } = 9000;
-        
+
 
         public void SetHotkey(string keyString)
         {
-            
-            
+
+
             Keys k;
             Enum.TryParse<Keys>(keyString, out k);
             ChannelHotKey = k;
@@ -169,11 +255,11 @@ namespace Percue.Model
 
         public void UnsetHotkey()
         {
-            if(_source != null)
+            if (_source != null)
                 _source.RemoveHook(HwndHook);
             _source = null;
             UnregisterHotKey();
-            
+
         }
 
         public void RegisterHotKey(Keys key)
@@ -183,12 +269,12 @@ namespace Percue.Model
             _source.AddHook(HwndHook);
 
             const uint MOD_CTRL = 0x0000;
-            
+
             if (!RegisterHotKey(helper.Handle, HOTKEY_ID, MOD_CTRL, (uint)key))
             {
                 // handle error
             }
-           
+
         }
 
         private void UnregisterHotKey()
@@ -202,10 +288,10 @@ namespace Percue.Model
             switch (msg)
             {
                 case WM_HOTKEY:
-                    if(wParam.ToInt32() == HOTKEY_ID)
-                    { 
-                            OnHotKeyPressed();
-                            handled = true;
+                    if (wParam.ToInt32() == HOTKEY_ID)
+                    {
+                        OnHotKeyPressed();
+                        handled = true;
                     }
                     break;
             }
