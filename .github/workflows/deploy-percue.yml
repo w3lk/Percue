@@ -3,7 +3,7 @@ name: "Deploy Percue"
 on:
   push:
     tags:
-      - "class-commands/v*"
+      - "Percue/v*"
 
 env:
   PROJECT_PATH: Percue/Percue.csproj
