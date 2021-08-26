@@ -85,7 +85,7 @@ namespace Percue
                         var ch = new Channel { Name = fileName };
                         ch.LoadAudioFromFile(filePath);
                         var hotKey = await this.ShowInputAsync("HotKey", "Specify Hot Key for "+ fileName);
-                        ch.SetHotkey(hotKey);
+                        ch.ChannelHotKey = new Hotkey(Key.A,ModifierKeys.None);
 
                         CurrentShow.Add(ch);
                     }

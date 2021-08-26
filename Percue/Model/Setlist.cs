@@ -20,6 +20,11 @@ namespace Percue.Model
         public Setlist() : base()
         {
             
+            
         }
+
+        
+
+        
     }
 }

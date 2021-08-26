@@ -10,7 +10,7 @@
              VerticalAlignment="Stretch"             
              d:DesignHeight="450" d:DesignWidth="800">
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">
-        <ItemsControl ItemsSource="{Binding}" VerticalAlignment="Stretch" HorizontalAlignment="Left" >
+        <ItemsControl ItemsSource="{Binding}" VerticalAlignment="Stretch" HorizontalAlignment="Left">
             <ItemsControl.ItemContainerStyle>
                 <Style TargetType="ContentPresenter">
                     <Setter Property="VerticalAlignment" Value="Stretch"/>
@@ -23,7 +23,7 @@
             </ItemsControl.ItemsPanel>
             <ItemsControl.ItemTemplate>
                 <DataTemplate DataType="{x:Type model:Channel}">
-                    <GroupBox VerticalAlignment="Stretch" Foreground="White" Width="120px">
+                    <GroupBox VerticalAlignment="Stretch" Foreground="White" Width="120px" >
                         <GroupBox.Header>
                             <StackPanel Orientation="Horizontal">
                                 <StackPanel.ContextMenu>
@@ -33,7 +33,9 @@
                                         <Separator/>
                                         <MenuItem Header="Settings" Icon="{iconPacks:MaterialDesign Kind=Settings}" Click="OpenSettingsWindow_Click"></MenuItem>
                                         <Separator/>
-                                        <MenuItem Header="Delete" Icon="{iconPacks:MaterialDesign Kind=Delete}"></MenuItem>
+                                        <MenuItem Header="Move Left" Icon="{iconPacks:MaterialDesign Kind=ChevronLeft}" Click="MoveChannelLeft_Click"  />
+                                        <MenuItem Header="Move Right" Icon="{iconPacks:MaterialDesign Kind=ChevronRight}" Click="MoveChannelRight_Click"/>
+                                        <MenuItem Header="Delete" Icon="{iconPacks:MaterialDesign Kind=Delete}" Click="DeleteChannel_Click"></MenuItem>
                                     </ContextMenu>
                                 </StackPanel.ContextMenu>
                                 <TextBlock Text="{Binding Name}" ToolTip="{Binding Name}"  VerticalAlignment="Center" Width="70px"/>

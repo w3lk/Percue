@@ -61,7 +61,6 @@ namespace Percue.View
             else
             {
                 ch.UnsetHotkey();
-                ch.SetHotkey(newHotKey);
             }
             
         }
@@ -82,6 +81,40 @@ namespace Percue.View
             settingsWindow.DataContext = ch;
 
             settingsWindow.Show();
+        }
+
+        
+        private void DeleteChannel_Click(object sender, RoutedEventArgs e)
+        {
+            if (!(sender is MenuItem mi)) return;
+            if (!(mi.DataContext is Channel ch)) return;            
+            if (!(DataContext is Setlist sl)) return;
+            
+            sl.Remove(ch);
+
+        }
+
+        private void MoveChannelRight_Click(object sender, RoutedEventArgs e)
+        {
+            if (!(sender is MenuItem mi)) return;
+            if (!(mi.DataContext is Channel ch)) return;
+            if (!(DataContext is Setlist sl)) return;
+
+            var oldPosition = sl.IndexOf(ch);
+            if (oldPosition < sl.Count)
+                sl.Move(oldPosition, oldPosition + 1);
+        }
+
+        private void MoveChannelLeft_Click(object sender, RoutedEventArgs e)
+        {
+            if (!(sender is MenuItem mi)) return;
+            if (!(mi.DataContext is Channel ch)) return;
+            if (!(DataContext is Setlist sl)) return;
+
+            var oldPosition = sl.IndexOf(ch);
+            if (oldPosition > 0)
+                sl.Move(oldPosition, oldPosition - 1);
+
         }
     }
 }

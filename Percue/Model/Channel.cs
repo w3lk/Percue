@@ -2,6 +2,7 @@
 using NAudio.Wave.SampleProviders;
 using NAudio.WaveFormRenderer;
 using Percue.Extensions;
+using Percue.Resources;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -61,18 +62,33 @@ namespace Percue.Model
                 isPlaying = value;
                 if (isPlaying)
                 {
-
-                    Play();
+                    if (PlaybackState == PlaybackState.Paused)
+                        Resume();
+                    if (PlaybackState == PlaybackState.Stopped)
+                    {
+                        Play();
+                    }
                 }
                 else
                 {
-                    Stop();
+                    if (DoPause)
+                        Pause();
+                    else
+                        Stop();
+
                 }
                 OnPropertyChanged(nameof(IsPlaying));
             }
         }
 
-        private int waveImgLength;
+        private bool doPause;
+        public bool DoPause
+        {
+            get { return doPause; }
+            set { doPause = value; OnPropertyChanged(nameof(DoPause)); }
+        }
+
+        
         private bool waveImgLoaded;
         private BitmapImage waveImg;
         [XmlIgnore]
@@ -161,10 +177,13 @@ namespace Percue.Model
             if (Audio.Length <= 0) return;
             IWaveProvider provider = new RawSourceWaveStream(
                          new MemoryStream(Audio), new WaveFormat());
+            
             volumeSampleProvider = new VolumeSampleProvider(provider.ToSampleProvider());
             volumeSampleProvider.Volume = ChannelVolume;
-            base.Init(volumeSampleProvider.ToWaveProvider());
+            var waveProvider = volumeSampleProvider.ToWaveProvider();
+            base.Init(waveProvider);
             base.Play();
+
         }
 
 
@@ -210,17 +229,29 @@ namespace Percue.Model
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
-        private Keys channelHotKey = Keys.None;
-        public Keys ChannelHotKey
+        private bool isHotKeySet;
+        public bool IsHotKeySet
+        {
+            get { return isHotKeySet; }
+            set { isHotKeySet = value; OnPropertyChanged(nameof(IsHotKeySet)); }
+        }
+
+        private Hotkey channelHotKey;
+        public Hotkey ChannelHotKey
         {
             get { return channelHotKey; }
             set
             {
                 channelHotKey = value;
-                if (channelHotKey == Keys.None)
+                if (IsHotKeySet)
+                {
                     UnsetHotkey();
-                else
+                    IsHotKeySet = false;
+                }
+                
                     RegisterHotKey(channelHotKey);
+                    IsHotKeySet = true;
+                
                 OnPropertyChanged(nameof(ChannelHotKey));
             }
 
@@ -244,14 +275,6 @@ namespace Percue.Model
         public int HOTKEY_ID { get; set; } = 9000;
 
 
-        public void SetHotkey(string keyString)
-        {
-
-
-            Keys k;
-            Enum.TryParse<Keys>(keyString, out k);
-            ChannelHotKey = k;
-        }
 
         public void UnsetHotkey()
         {
@@ -276,7 +299,21 @@ namespace Percue.Model
             }
 
         }
+        public void RegisterHotKey(Hotkey key)
+        {
+            var helper = new WindowInteropHelper(System.Windows.Application.Current.MainWindow);
+            _source = HwndSource.FromHwnd(helper.Handle);
+            _source.AddHook(HwndHook);
 
+            
+            uint MOD_CTRL = (uint)key.Modifiers;
+
+            if (!RegisterHotKey(helper.Handle, HOTKEY_ID, MOD_CTRL, (uint)key.Key))
+            {
+                // handle error
+            }
+
+        }
         private void UnregisterHotKey()
         {
             var helper = new WindowInteropHelper(System.Windows.Application.Current.MainWindow);
@@ -297,7 +334,8 @@ namespace Percue.Model
             }
             return IntPtr.Zero;
         }
-
+        
+       
         private void OnHotKeyPressed()
         {
             IsPlaying = !IsPlaying;

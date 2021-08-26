@@ -13,6 +13,7 @@
     <StartupObject>Percue.App</StartupObject>
     <Authors>Marius Welk</Authors>
     <SignAssembly>false</SignAssembly>
+    <Version>1.0.3</Version>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <PlatformTarget>x64</PlatformTarget>
