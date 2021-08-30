@@ -33,7 +33,7 @@ namespace Percue
 
             //Setup the versions
             Version latestGitHubVersion = new Version(releases[0].TagName);
-            Version localVersion = new Version("1.0.2"); //Replace this with your local version. 
+            Version localVersion = new Version("1.0.5"); //Replace this with your local version. 
                                                          //Only tested with numeric values.
 
             //Compare the Versions
