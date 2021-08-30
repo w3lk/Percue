@@ -25,11 +25,14 @@
                 <DataTemplate DataType="{x:Type model:Channel}">
                     <GroupBox VerticalAlignment="Stretch" Foreground="White" Width="120px" >
                         <GroupBox.Header>
-                            <StackPanel Orientation="Horizontal">
-                                <StackPanel.ContextMenu>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions> 
+                                <Grid.ContextMenu>
                                     <ContextMenu>
                                         <MenuItem Header="{Binding Name}" Icon="{iconPacks:FontAwesome Kind=SignatureSolid}" Click="ChangeName_Click"></MenuItem>
-                                        <MenuItem Header="{Binding ChannelHotKey}" Icon="{iconPacks:MaterialDesign Kind=Keyboard}" Click="EditHotKey_Click"></MenuItem>
                                         <Separator/>
                                         <MenuItem Header="Settings" Icon="{iconPacks:MaterialDesign Kind=Settings}" Click="OpenSettingsWindow_Click"></MenuItem>
                                         <Separator/>
@@ -37,10 +40,10 @@
                                         <MenuItem Header="Move Right" Icon="{iconPacks:MaterialDesign Kind=ChevronRight}" Click="MoveChannelRight_Click"/>
                                         <MenuItem Header="Delete" Icon="{iconPacks:MaterialDesign Kind=Delete}" Click="DeleteChannel_Click"></MenuItem>
                                     </ContextMenu>
-                                </StackPanel.ContextMenu>
+                                </Grid.ContextMenu>
                                 <TextBlock Text="{Binding Name}" ToolTip="{Binding Name}"  VerticalAlignment="Center" Width="70px"/>
-                                <Button Click="ChangeName_Click" Content="{iconPacks:Zondicons Kind=EditPencil, Height=8}" Margin="10 0 0 0" Background="Transparent" BorderBrush="#00707070" BorderThickness="0"/>
-                            </StackPanel>
+                                <Button Grid.Column="1" Click="OpenSettingsWindow_Click" Content="{iconPacks:MaterialDesign Kind=Settings, Height=9}" Margin="5 0 0 0" Background="Transparent" BorderBrush="#00707070" BorderThickness="0"/>
+                            </Grid>
                         </GroupBox.Header>
                         <Grid>
                             <Grid.RowDefinitions>
@@ -55,11 +58,9 @@
                             <Grid Grid.Row="2" >
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0" Text="{Binding ChannelHotKey}" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                            
-                                <Button Grid.Column="1" Click="EditHotKey_Click" Content="{iconPacks:Zondicons Kind=EditPencil, Height=8}" Margin="10 0 0 0" Background="Transparent" BorderBrush="#00707070" BorderThickness="0"/>
+                                <TextBlock Grid.Column="0" Text="{Binding ChannelHotKey}" FontSize="10" Foreground="LightSlateGray" HorizontalAlignment="Center" VerticalAlignment="Center"  Margin="0 0 0 5" />
+                                <!--- <Button Grid.Column="1" Click="EditHotKey_Click" Content="{iconPacks:Zondicons Kind=EditPencil, Height=8}" Margin="10 0 0 0" Background="Transparent" BorderBrush="#00707070" BorderThickness="0"/> -->
                             </Grid>
                         </Grid>
                     </GroupBox>

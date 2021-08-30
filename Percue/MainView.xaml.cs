@@ -3,6 +3,7 @@ using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
 using Percue.Model;
 using Percue.Resources;
+using Percue.View;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -26,10 +27,12 @@ using System.Xml.Serialization;
 namespace Percue
 {
     /// <summary>
-    /// Interaktionslogik für MainWindow.xaml
+    /// Interaktionslogik für MainView.xaml
     /// </summary>
-    public partial class MainWindow : MetroWindow, INotifyPropertyChanged
+    public partial class MainView : MetroWindow, INotifyPropertyChanged
     {
+        
+
 
         private Setlist currentShow = new Setlist();
         public Setlist CurrentShow
@@ -42,7 +45,7 @@ namespace Percue
         }
 
 
-        public MainWindow()
+        public MainView()
         {
             InitializeComponent();
 
@@ -84,14 +87,31 @@ namespace Percue
                         var fileName = System.IO.Path.GetFileNameWithoutExtension(filePath);
                         var ch = new Channel { Name = fileName };
                         ch.LoadAudioFromFile(filePath);
-                        var hotKey = await this.ShowInputAsync("HotKey", "Specify Hot Key for "+ fileName);
-                        ch.ChannelHotKey = new Hotkey(Key.A,ModifierKeys.None);
+
+                        var dialogViewModel = new HotkeyAssignDialogViewModel();
+                        dialogViewModel.Title = "Assign Hotkey";
+                        dialogViewModel.Message = "Assign a Hotkey for the new created channel.";
+
+                        dialogView = new HotkeyAssignDialogView();
+                        dialogView.DataContext = dialogViewModel;
+
+                        await this.ShowMetroDialogAsync(dialogView);
+                        dialogViewModel.CloseRequested += Close_NewHotkeyDialog;
+                        await dialogView.WaitUntilUnloadedAsync();
+
+                        //var hotKey = await this.ShowInputAsync("HotKey", "Specify Hot Key for "+ fileName);
+                        ch.ChannelHotKey = dialogViewModel.Hotkey;
 
                         CurrentShow.Add(ch);
                     }
                 }
             }
 
+        }
+
+        private async void Close_NewHotkeyDialog(object sender, EventArgs e)
+        {
+            await this.HideMetroDialogAsync(dialogView);
         }
 
         private RelayCommand saveShow;
@@ -208,6 +228,8 @@ namespace Percue
 
         private string LastShowPath = AppDomain.CurrentDomain.BaseDirectory + "//LastShow.pc";
         private bool closeMe;
+        private HotkeyAssignDialogView dialogView;
+
         private async void MetroWindow_Closing(object sender, CancelEventArgs e)
         {
             if (e.Cancel) return;

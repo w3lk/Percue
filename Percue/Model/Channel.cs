@@ -2,7 +2,6 @@
 using NAudio.Wave.SampleProviders;
 using NAudio.WaveFormRenderer;
 using Percue.Extensions;
-using Percue.Resources;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -311,7 +310,7 @@ namespace Percue.Model
             if (KEY_ID > 0)
             {
                 if (!RegisterHotKey(helper.Handle, HOTKEY_ID, MOD_CTRL, KEY_ID))
-                N{
+                {
                     // handle error
                 }
             }
