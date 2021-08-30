@@ -30,6 +30,7 @@
     <PackageReference Include="MvvmLight" Version="5.4.1.1" />
     <PackageReference Include="NAudio" Version="2.0.1" />
     <PackageReference Include="NAudio.WaveFormRenderer" Version="1.0.0" />
+    <PackageReference Include="Octokit" Version="0.50.0" />
     <PackageReference Include="System.Reflection" Version="4.3.0" />
   </ItemGroup>
   <ItemGroup>
