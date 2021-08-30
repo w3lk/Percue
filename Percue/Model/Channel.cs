@@ -35,7 +35,7 @@ namespace Percue.Model
 
         }
 
-        private static int ChannelId = 0;
+        private static int ChannelId = 1;
 
         private void Channel_PlaybackStopped(object sender, StoppedEventArgs e)
         {
@@ -307,10 +307,13 @@ namespace Percue.Model
 
             
             uint MOD_CTRL = (uint)key.Modifiers;
-
-            if (!RegisterHotKey(helper.Handle, HOTKEY_ID, MOD_CTRL, (uint)key.Key))
+            uint KEY_ID = (uint)KeyInterop.VirtualKeyFromKey(key.Key);
+            if (KEY_ID > 0)
             {
-                // handle error
+                if (!RegisterHotKey(helper.Handle, HOTKEY_ID, MOD_CTRL, KEY_ID))
+                N{
+                    // handle error
+                }
             }
 
         }
