@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -32,8 +33,12 @@ namespace Percue
             IReadOnlyList<Release> releases = await client.Repository.Release.GetAll("w3lk", "Percue");
 
             //Setup the versions
-            Version latestGitHubVersion = new Version(releases[0].TagName);
-            Version localVersion = new Version("1.0.5"); //Replace this with your local version. 
+            Regex rx = new Regex(@".*(\d\.\d\.\d)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            var matches = rx.Matches(releases[0].TagName);
+            var versionString = matches[0].Groups[1].Value;
+            
+            Version latestGitHubVersion = new Version(versionString);
+            Version localVersion = new Version("1.0.6"); //Replace this with your local version. 
                                                          //Only tested with numeric values.
 
             //Compare the Versions
