@@ -273,8 +273,9 @@ namespace Percue
             var fs = File.Open(LastShowPath,FileMode.Open);
             var ser = new XmlSerializer(typeof(Setlist));
             CurrentShow = (Setlist)ser.Deserialize(fs);
-            OnPropertyChanged(nameof(CurrentShow));          
+            OnPropertyChanged(nameof(CurrentShow));       
             fs.Close();
+            
             
         }
     }
