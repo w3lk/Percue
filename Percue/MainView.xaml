@@ -7,7 +7,7 @@
         xmlns:local="clr-namespace:Percue"
         xmlns:view="clr-namespace:Percue.View"
         mc:Ignorable="d"
-        Title="Percue" Height="450" Width="800"        
+        Title="Percue 1.0.7" Height="450" Width="800"        
         DataContext="{Binding RelativeSource={RelativeSource Self}}"
         Closing ="MetroWindow_Closing"
         Loaded="MetroWindow_Loaded"
