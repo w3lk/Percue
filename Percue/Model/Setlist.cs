@@ -19,12 +19,30 @@ namespace Percue.Model
         
         public Setlist() : base()
         {
-            
+           
             
         }
-
         
+       
 
+        public void StopAllTracks()
+        {
+            foreach (var item in this)
+            {
+                item.IsPlaying = false;
+            }
+        }
+
+        public void StopAllButThis(Channel channel)
+        {
+            foreach(var item in this)
+            {
+                if(item != channel)
+                {
+                    item.IsPlaying = false;
+                }
+            }
+        }
         
     }
 }

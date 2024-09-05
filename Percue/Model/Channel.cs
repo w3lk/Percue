@@ -32,6 +32,8 @@ namespace Percue.Model
             HOTKEY_ID = 9000 + ChannelId;
             ChannelId += 1;
 
+            parentView = (MainView)System.Windows.Application.Current.MainWindow;
+
         }
 
         private static int ChannelId = 1;
@@ -51,6 +53,8 @@ namespace Percue.Model
             }
         }
 
+        private MainView parentView;
+
         private bool isPlaying;
         [XmlIgnoreAttribute]
         public bool IsPlaying
@@ -61,12 +65,18 @@ namespace Percue.Model
                 isPlaying = value;
                 if (isPlaying)
                 {
+                    if(DoStopOthers)
+                    {
+                        parentView.CurrentShow.StopAllButThis(this);
+                    }
+                    
                     if (PlaybackState == PlaybackState.Paused)
                         Resume();
                     if (PlaybackState == PlaybackState.Stopped)
                     {
                         Play();
                     }
+
                 }
                 else
                 {
@@ -87,6 +97,12 @@ namespace Percue.Model
             set { doPause = value; OnPropertyChanged(nameof(DoPause)); }
         }
 
+        private bool doStopOthers;
+        public bool DoStopOthers
+        {
+            get { return doStopOthers; }
+            set { doStopOthers = value; OnPropertyChanged(nameof(DoStopOthers)); }
+        }
         
         private bool waveImgLoaded;
         private BitmapImage waveImg;

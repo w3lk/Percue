@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Percue.Model;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,6 +24,18 @@ namespace Percue.View
         public ChannelSettings()
         {
             InitializeComponent();
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            MainView wnd = (MainView)Application.Current.MainWindow;
+            Channel ch = (Channel)DataContext;
+            wnd.CurrentShow.Remove(ch);
+        }
+
+        private void Button_Click_1(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }
