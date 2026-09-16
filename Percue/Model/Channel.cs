@@ -202,9 +202,17 @@ namespace Percue.Model
         }
 
 
-        public void LoadAudioFromFile(string path)
-        {
-            var outfile = @"C:\Temp\converted.wav";
+        public void LoadAudioFromFile(string path) 
+        { 
+            var tempFolder = @"C:\Temp";
+            var outfile = Path.Combine(tempFolder, "converted.wav");
+
+            // Check + create folder
+            if (!Directory.Exists(tempFolder))
+            {
+                Directory.CreateDirectory(tempFolder);
+            }
+
 
             using (var reader = new MediaFoundationReader(path))
             {
@@ -226,7 +234,7 @@ namespace Percue.Model
             settings.BackgroundColor = System.Drawing.Color.Transparent;
             try
             {
-                Bitmap img = (Bitmap)renderer.Render(path, settings);
+                Bitmap img = (Bitmap)renderer.Render(outfile, settings);
                 img.Save(@"C:\Temp\imgRenderer.bmp");
                 WaveImg = BitmapExtensions.ToBitmapImage(img);
             }
