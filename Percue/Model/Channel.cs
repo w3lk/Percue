@@ -71,7 +71,7 @@ namespace Percue.Model
                     }
                     
                     if (PlaybackState == PlaybackState.Paused)
-                        Resume();
+                        Play();
                     if (PlaybackState == PlaybackState.Stopped)
                     {
                         Play();
@@ -226,6 +226,8 @@ namespace Percue.Model
 
             var renderer = new WaveFormRenderer();
 
+            
+            
 
             var settings = new StandardWaveFormRendererSettings();
             settings.Width = 640;
@@ -234,13 +236,20 @@ namespace Percue.Model
             settings.BackgroundColor = System.Drawing.Color.Transparent;
             try
             {
-                Bitmap img = (Bitmap)renderer.Render(outfile, settings);
-                img.Save(@"C:\Temp\imgRenderer.bmp");
-                WaveImg = BitmapExtensions.ToBitmapImage(img);
+                using (var waveStream = new WaveFileReader(outfile))
+                {
+                    Bitmap img = renderer.Render(waveStream, settings) as Bitmap;
+                    if (img != null)
+                    {
+                        img.Save(@"C:\Temp\imgRenderer.bmp");
+                        WaveImg = BitmapExtensions.ToBitmapImage(img);
+                        img.Dispose();
+                    }
+                }
             }
             catch (Exception ex)
             {
-
+                Console.Write(ex.Message);
             }
         }
 
