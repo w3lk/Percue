@@ -35,7 +35,12 @@ namespace Percue.View
 
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
-
+            // Schließe das übergeordnete Fenster (z.B. ChannelControlWindow)
+            var wnd = Window.GetWindow(this);
+            if (wnd != null)
+            {
+                wnd.Close();
+            }
         }
     }
 }
