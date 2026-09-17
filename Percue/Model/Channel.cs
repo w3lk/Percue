@@ -167,6 +167,7 @@ namespace Percue.Model
         private bool isLooping = false;
         private float pan = 0.0f; // -1.0 (left) .. 1.0 (right)
         private double fadeInSeconds = 0.0;
+        private double startOffsetSeconds = 0.0;
         private CancellationTokenSource fadeCancellationTokenSource = null;
         public float ChannelVolume
         {
@@ -221,6 +222,13 @@ namespace Percue.Model
             set { fadeInSeconds = value; OnPropertyChanged(nameof(FadeInSeconds)); }
         }
 
+        [XmlElement]
+        public double StartOffsetSeconds
+        {
+            get => startOffsetSeconds;
+            set { startOffsetSeconds = value; OnPropertyChanged(nameof(StartOffsetSeconds)); }
+        }
+
         private byte[] audio;
         public byte[] Audio
         {
@@ -246,6 +254,26 @@ namespace Percue.Model
                 playbackStream = new LoopStream(rawStream);
             }
 
+            // If a start offset is configured, seek into the stream by the given number of seconds
+            try
+            {
+                if (StartOffsetSeconds > 0 && playbackStream != null && playbackStream.Length > 0)
+                {
+                    var bytesPerSec = playbackStream.WaveFormat.AverageBytesPerSecond;
+                    var offsetBytes = (long)(StartOffsetSeconds * bytesPerSec);
+                    if (offsetBytes < playbackStream.Length)
+                    {
+                        playbackStream.Position = offsetBytes;
+                    }
+                    else
+                    {
+                        // If offset exceeds length, start at end (no audio) to avoid exception
+                        playbackStream.Position = playbackStream.Length;
+                    }
+                }
+            }
+            catch { }
+
             // Build sample provider pipeline: to sample provider -> ensure stereo for panning -> apply panning -> apply volume
             ISampleProvider sample = playbackStream.ToSampleProvider();
 
@@ -257,7 +285,8 @@ namespace Percue.Model
 
             if (Pan != 0f)
             {
-                var panner = new PanningSampleProvider(sample);
+                var monoSample = new StereoToMonoSampleProvider(sample);
+                var panner = new PanningSampleProvider(monoSample);
                 panner.Pan = Pan;
                 sample = panner;
             }
