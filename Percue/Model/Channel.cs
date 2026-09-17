@@ -12,6 +12,7 @@ using System.Media;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Threading;
 using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Input;
@@ -71,7 +72,7 @@ namespace Percue.Model
                     }
                     
                     if (PlaybackState == PlaybackState.Paused)
-                        Resume();
+                        Play();
                     if (PlaybackState == PlaybackState.Stopped)
                     {
                         Play();
@@ -84,6 +85,9 @@ namespace Percue.Model
                         Pause();
                     else
                         Stop();
+
+                    // stop any running fade
+                    CancelFade();
 
                 }
                 OnPropertyChanged(nameof(IsPlaying));
@@ -159,20 +163,70 @@ namespace Percue.Model
 
         private VolumeSampleProvider volumeSampleProvider;
         private float channelVolume = 1.0f;
+        private bool isMuted = false;
+        private bool isLooping = false;
+        private float pan = 0.0f; // -1.0 (left) .. 1.0 (right)
+        private double fadeInSeconds = 0.0;
+        private double startOffsetSeconds = 0.0;
+        private CancellationTokenSource fadeCancellationTokenSource = null;
         public float ChannelVolume
         {
             get { return channelVolume; }
 
             set
             {
+                channelVolume = value;
                 if (volumeSampleProvider != null)
                 {
-                    volumeSampleProvider.Volume = value;
+                    // respect mute state
+                    // If a fade is running, let the fade task control the volume; otherwise set immediately
+                    if (fadeCancellationTokenSource == null)
+                    {
+                        volumeSampleProvider.Volume = isMuted ? 0f : value;
+                    }
                 }
 
-                channelVolume = value;
                 OnPropertyChanged(nameof(ChannelVolume));
             }
+        }
+
+        public bool IsMuted
+        {
+            get => isMuted;
+            set
+            {
+                isMuted = value;
+                if (volumeSampleProvider != null)
+                {
+                    volumeSampleProvider.Volume = isMuted ? 0f : channelVolume;
+                }
+                OnPropertyChanged(nameof(IsMuted));
+            }
+        }
+
+        public bool IsLooping
+        {
+            get => isLooping;
+            set { isLooping = value; OnPropertyChanged(nameof(IsLooping)); }
+        }
+
+        public float Pan
+        {
+            get => pan;
+            set { pan = value; OnPropertyChanged(nameof(Pan)); }
+        }
+
+        public double FadeInSeconds
+        {
+            get => fadeInSeconds;
+            set { fadeInSeconds = value; OnPropertyChanged(nameof(FadeInSeconds)); }
+        }
+
+        [XmlElement]
+        public double StartOffsetSeconds
+        {
+            get => startOffsetSeconds;
+            set { startOffsetSeconds = value; OnPropertyChanged(nameof(StartOffsetSeconds)); }
         }
 
         private byte[] audio;
@@ -190,21 +244,111 @@ namespace Percue.Model
         {
             if (Audio == null) return;
             if (Audio.Length <= 0) return;
-            IWaveProvider provider = new RawSourceWaveStream(
-                         new MemoryStream(Audio), new WaveFormat());
-            
-            volumeSampleProvider = new VolumeSampleProvider(provider.ToSampleProvider());
-            volumeSampleProvider.Volume = ChannelVolume;
+            // Create a WaveStream from raw audio bytes
+            var memStream = new MemoryStream(Audio);
+            var rawStream = new RawSourceWaveStream(memStream, new WaveFormat());
+
+            WaveStream playbackStream = rawStream;
+            if (IsLooping)
+            {
+                playbackStream = new LoopStream(rawStream);
+            }
+
+            // If a start offset is configured, seek into the stream by the given number of seconds
+            try
+            {
+                if (StartOffsetSeconds > 0 && playbackStream != null && playbackStream.Length > 0)
+                {
+                    var bytesPerSec = playbackStream.WaveFormat.AverageBytesPerSecond;
+                    var offsetBytes = (long)(StartOffsetSeconds * bytesPerSec);
+                    if (offsetBytes < playbackStream.Length)
+                    {
+                        playbackStream.Position = offsetBytes;
+                    }
+                    else
+                    {
+                        // If offset exceeds length, start at end (no audio) to avoid exception
+                        playbackStream.Position = playbackStream.Length;
+                    }
+                }
+            }
+            catch { }
+
+            // Build sample provider pipeline: to sample provider -> ensure stereo for panning -> apply panning -> apply volume
+            ISampleProvider sample = playbackStream.ToSampleProvider();
+
+            // If mono, convert to stereo so panning works
+            if (sample.WaveFormat.Channels == 1)
+            {
+                sample = new MonoToStereoSampleProvider(sample);
+            }
+
+            if (Pan != 0f)
+            {
+                var monoSample = new StereoToMonoSampleProvider(sample);
+                var panner = new PanningSampleProvider(monoSample);
+                panner.Pan = Pan;
+                sample = panner;
+            }
+
+            volumeSampleProvider = new VolumeSampleProvider(sample);
+
             var waveProvider = volumeSampleProvider.ToWaveProvider();
             base.Init(waveProvider);
             base.Play();
 
+            // handle fade-in
+            CancelFade();
+            if (!IsMuted && FadeInSeconds > 0)
+            {
+                // start from 0 and ramp to ChannelVolume
+                volumeSampleProvider.Volume = 0f;
+                fadeCancellationTokenSource = new CancellationTokenSource();
+                var token = fadeCancellationTokenSource.Token;
+                var target = ChannelVolume;
+                var duration = FadeInSeconds;
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        var sw = System.Diagnostics.Stopwatch.StartNew();
+                        while (!token.IsCancellationRequested)
+                        {
+                            var elapsed = sw.Elapsed.TotalSeconds;
+                            var t = Math.Min(1.0, elapsed / duration);
+                            var vol = (float)(target * t);
+                            volumeSampleProvider.Volume = vol;
+                            if (t >= 1.0) break;
+                            await Task.Delay(30, token).ConfigureAwait(false);
+                        }
+                        // ensure final volume
+                        if (!token.IsCancellationRequested)
+                        {
+                            volumeSampleProvider.Volume = target;
+                        }
+                    }
+                    catch (OperationCanceledException) { }
+                }, token);
+            }
+            else
+            {
+                volumeSampleProvider.Volume = IsMuted ? 0f : ChannelVolume;
+            }
+
         }
 
 
-        public void LoadAudioFromFile(string path)
-        {
-            var outfile = @"C:\Temp\converted.wav";
+        public void LoadAudioFromFile(string path) 
+        { 
+            var tempFolder = @"C:\Temp";
+            var outfile = Path.Combine(tempFolder, "converted.wav");
+
+            // Check + create folder
+            if (!Directory.Exists(tempFolder))
+            {
+                Directory.CreateDirectory(tempFolder);
+            }
+
 
             using (var reader = new MediaFoundationReader(path))
             {
@@ -218,6 +362,8 @@ namespace Percue.Model
 
             var renderer = new WaveFormRenderer();
 
+            
+            
 
             var settings = new StandardWaveFormRendererSettings();
             settings.Width = 640;
@@ -226,13 +372,20 @@ namespace Percue.Model
             settings.BackgroundColor = System.Drawing.Color.Transparent;
             try
             {
-                Bitmap img = (Bitmap)renderer.Render(path, settings);
-                img.Save(@"C:\Temp\imgRenderer.bmp");
-                WaveImg = BitmapExtensions.ToBitmapImage(img);
+                using (var waveStream = new WaveFileReader(outfile))
+                {
+                    Bitmap img = renderer.Render(waveStream, settings) as Bitmap;
+                    if (img != null)
+                    {
+                        img.Save(@"C:\Temp\imgRenderer.bmp");
+                        WaveImg = BitmapExtensions.ToBitmapImage(img);
+                        img.Dispose();
+                    }
+                }
             }
             catch (Exception ex)
             {
-
+                Console.Write(ex.Message);
             }
         }
 
@@ -300,6 +453,20 @@ namespace Percue.Model
 
         }
 
+        private void CancelFade()
+        {
+            try
+            {
+                if (fadeCancellationTokenSource != null)
+                {
+                    fadeCancellationTokenSource.Cancel();
+                    fadeCancellationTokenSource.Dispose();
+                    fadeCancellationTokenSource = null;
+                }
+            }
+            catch { }
+        }
+
         public void RegisterHotKey(Keys key)
         {
             var helper = new WindowInteropHelper(System.Windows.Application.Current.MainWindow);
@@ -357,6 +524,47 @@ namespace Percue.Model
         private void OnHotKeyPressed()
         {
             IsPlaying = !IsPlaying;
+        }
+    }
+
+    // Simple looping WaveStream wrapper
+    internal class LoopStream : WaveStream
+    {
+        private readonly WaveStream sourceStream;
+
+        public LoopStream(WaveStream source)
+        {
+            this.sourceStream = source;
+        }
+
+        public override WaveFormat WaveFormat => sourceStream.WaveFormat;
+
+        public override long Length => sourceStream.Length;
+
+        public override long Position
+        {
+            get => sourceStream.Position;
+            set => sourceStream.Position = value;
+        }
+
+        public override int Read(byte[] buffer, int offset, int count)
+        {
+            int totalBytesRead = 0;
+            while (totalBytesRead < count)
+            {
+                int bytesRead = sourceStream.Read(buffer, offset + totalBytesRead, count - totalBytesRead);
+                if (bytesRead == 0)
+                {
+                    // restart
+                    sourceStream.Position = 0;
+                    // if still no data, break to avoid infinite loop
+                    bytesRead = sourceStream.Read(buffer, offset + totalBytesRead, count - totalBytesRead);
+                    if (bytesRead == 0)
+                        break;
+                }
+                totalBytesRead += bytesRead;
+            }
+            return totalBytesRead;
         }
     }
 }
